@@ -2,14 +2,14 @@
 
 #include "ll/api/mod/NativeMod.h"
 
-namespace my_mod {
+namespace tick_command {
 
-class MyMod {
+class TickCommand {
 
 public:
-    static MyMod& getInstance();
+    static TickCommand& getInstance();
 
-    MyMod(ll::mod::NativeMod& self) : mSelf(self) {}
+    TickCommand(ll::mod::NativeMod& self) : mSelf(self) {}
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 
@@ -30,4 +30,4 @@ private:
     ll::mod::NativeMod& mSelf;
 };
 
-} // namespace my_mod
+} // namespace tick_command
