@@ -15,6 +15,7 @@ lip install github.com/odorajbotoj/TickCommand
 + `tick query` 查询mspt
 + `tick freeze|reset` 冻结/重置tick
 + `tick rate <float>` 调整tick速率
++ `tick step <int>(t|s|d)` 以最快的速度向前执行指定tick（后缀：t/tick，s/秒，d/游戏日，不指定/默认t）
 
 ## Contributing
 
