@@ -3,6 +3,7 @@
 #include <chrono>
 #include <memory>
 
+#include "ll/api/memory/Memory.h"
 #include "ll/api/mod/RegisterHelper.h"
 
 #include "ll/api/command/CommandHandle.h"
@@ -12,7 +13,7 @@
 #include "mc/server/commands/CommandOutput.h"
 #include "mc/server/commands/CommandPermissionLevel.h"
 #include "mc/util/ProfilerLite.h"
-// #include "mc/util/Timer.h"
+#include "mc/util/Timer.h"
 #include "mc/world/Minecraft.h"
 
 
@@ -84,43 +85,37 @@ bool TickCommand::enable() {
         }
     );
 
-    /*
-        // tick step <int>
-        static auto stepFn = [](CommandOutput& output, int tick) {
-            if (!::Command::validRange(tick, 0, INT_MAX, output)) {
-                return;
-            }
-            auto mc = ll::service::getMinecraft();
-            if (mc.has_value()) {
-                auto* timerPtr = mc.as_ptr() + 27;
-                if (timerPtr) {
-                    auto* timer = reinterpret_cast<Timer*>(timerPtr);
-                    if (timer) timer->stepTick(tick);
-                    // else output.error("inner else"); // debug
-                } // else output.error("outer else"); // debug
-            }
-            output.success("step {} tick(s)", tick);
-        };
-        struct TickStepParam {
-            int time;
-        };
-        tickCommand.overload<TickStepParam>().text("step").required("time").execute(
-            [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) { stepFn(output, param.time); }
-        );
-        tickCommand.overload<TickStepParam>().text("step").required("time").postfix("t").execute(
-            [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) { stepFn(output, param.time); }
-        );
-        tickCommand.overload<TickStepParam>().text("step").required("time").postfix("s").execute(
-            [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) {
-                stepFn(output, param.time * 20);
-            }
-        );
-        tickCommand.overload<TickStepParam>().text("step").required("time").postfix("d").execute(
-            [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) {
-                stepFn(output, param.time * 24000);
-            }
-        );
-    */
+    // tick step <int>
+    static auto stepFn = [](CommandOutput& output, int tick) {
+        if (!::Command::validRange(tick, 0, INT_MAX, output)) {
+            return;
+        }
+        auto mc = ll::service::getMinecraft();
+        if (mc.has_value()) {
+            auto* timer = ll::memory::dAccess<Timer*>(mc.as_ptr(), 0xD8);
+            timer->stepTick(tick);
+        }
+        output.success("step {} tick(s)", tick);
+    };
+    struct TickStepParam {
+        int time;
+    };
+    tickCommand.overload<TickStepParam>().text("step").required("time").execute(
+        [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) { stepFn(output, param.time); }
+    );
+    tickCommand.overload<TickStepParam>().text("step").required("time").postfix("t").execute(
+        [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) { stepFn(output, param.time); }
+    );
+    tickCommand.overload<TickStepParam>().text("step").required("time").postfix("s").execute(
+        [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) {
+            stepFn(output, param.time * 20);
+        }
+    );
+    tickCommand.overload<TickStepParam>().text("step").required("time").postfix("d").execute(
+        [&](CommandOrigin const&, CommandOutput& output, TickStepParam const& param) {
+            stepFn(output, param.time * 24000);
+        }
+    );
 
     getSelf().getLogger().debug("Enabled.");
     return true;
